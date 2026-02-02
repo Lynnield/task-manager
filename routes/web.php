@@ -1,36 +1,26 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\TaskController;
+use App\Http\Controllers\ProfileController;
 
 Route::get('/', function () {
-    return view('home');
-})->name('home');
+    return redirect('/login');
+});
 
-Route::get('/about', function () {
-$name = 'Lynnield Que'; // Replace with YOUR name
-$course = 'Bachelor of Science in Information Technology';
-$university = 'Central Mindanao University'; // Replace with YOUR university
-return view('about', [
-'name' => $name,
-'course' => $course,
-'university' => $university
-]);
-})->name('about');
+Route::middleware('guest')->group(function () {
+    Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
+    Route::post('/register', [AuthController::class, 'register']);
+    Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [AuthController::class, 'login']);
+});
 
-Route::get('/projects', function () {
-$projects = [
-['title' => 'Project 1', 'description' => 'My first web project'],
-['title' => 'Project 2', 'description' => 'E-commerce website'],
-['title' => 'Project 3', 'description' => 'Mobile app design'],
-];
-return view('projects', ['projects' => $projects]);
-})->name('projects');
+Route::middleware('auth.manual')->group(function () {
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    
+    Route::resource('tasks', TaskController::class)->except(['show']);
 
-Route::get('/contact', function () {
-$email = 'lynnieldque2004@gmail.com'; // Replace with YOUR email
-$phone = '+63 955 951 4198'; // Replace with YOUR phone
-return view('contact', [
-'email' => $email,
-'phone' => $phone
-]);
-})->name('contact');
+    Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+});
